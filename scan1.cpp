@@ -60,11 +60,9 @@ double* scan3(double* x, int n) {
     double sum;
     if (n > 1) {
         #pragma omp parallel
+		#pragma omp single
         {
-            #pragma omp single
             scan_up(x, t, 1, n, sum);
-
-            #pragma omp single
             scan_down(x[0], x, t, y, 1, n);
         }
     }
