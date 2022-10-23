@@ -1,24 +1,23 @@
 #include <iostream>
-#include <vector>
 #include <cassert>
 #include <omp.h>
 
 using namespace std;
 
-vector<double> scan3(vector<double>);
-vector<double> scan1(vector<double>);
-double scan_up(vector<double>, vector<double>&, int, int);
+double* scan3(double*, int);
+double* scan1(double*, int);
+void scan_up(double*, double*, int, int, double& sum);
 void scan_down(
         double, 
-        vector<double>, 
-        vector<double>, 
-        vector<double>&, 
+        double*, 
+        double*, 
+        double*, 
         int, 
         int);
 double add(double, double);
 
 template <typename T>
-void printvec(vector<T>);
+void printvec(T*, int);
 
 int main(int argc, char* argv[]) {
     if (argc != 4) {
@@ -30,51 +29,51 @@ int main(int argc, char* argv[]) {
     int length = atoi(argv[2]);
     int n_threads = atoi(argv[3]);
     omp_set_num_threads(n_threads); 
-
-    vector<double> vec (length, 0);
+    
+    double* vec = new double[length];
     for (int i = 0; i < length; i++) 
         vec[i] = rand() % length;
 
-    vector<double> scanned3;
+    double* scanned3 = scan3(vec, length);
+    double* scanned1 = scan1(vec, length);
 
-    scanned3 = scan3(vec);
-    vector<double> scanned1 = scan1(vec);
+    printvec(vec, length);
+    printvec(scanned3, length);
+    printvec(scanned1, length);
 
-    printvec(vec);
-    printvec(scanned3);
-    printvec(scanned1);
-    assert(scanned3==scanned1);
+    for (int i = 0; i < length; i++) {
+        assert(scanned3[i] == scanned1[i]);
+    }
 
 }
 
-vector<double> scan3(vector<double> x) {
-    int len = x.size();
-    vector<double> y (len, 0);
-    vector<double> t (len, 0);
+double* scan3(double* x, int n) {
+    double* y = new double[n];
+    double* t = new double[n];
 
     y[0] = x[0];
 
-    if (len > 1) {
+    double sum;
+    if (n > 1) {
         #pragma omp parallel
         {
             #pragma omp single
-            scan_up(x, t, 1, len);
+            scan_up(x, t, 1, n, sum);
 
             #pragma omp barrier
 
             #pragma omp single
-            scan_down(x[0], x, t, y, 1, len);
+            scan_down(x[0], x, t, y, 1, n);
         }
     }
     return y;
 }
 
-vector<double> scan1(vector<double> x) {
-    int len = x.size();
+double* scan1(double* x, int n) {;
     double sum = 0;
-    vector<double> y (len, 0);
+    double* y = new double[n];
 
-    for (int i = 0; i < x.size(); i++) {
+    for (int i = 0; i < n; i++) {
         sum += x[i];
         y[i] = sum;
     }
@@ -82,23 +81,24 @@ vector<double> scan1(vector<double> x) {
     return y;
 }
 
-double scan_up(vector<double> x, vector<double>& t, int i, int j) {
+void scan_up(double* x, double* t, int i, int j, double& sum) {
     if (i == j)
-        return x[i];
+        sum = x[i];
     else {
         int k = (i+j)/2;
         #pragma omp task
-        t[k] = scan_up(x,t,i,k);
-        double right = scan_up(x,t,k+1,j);
+        scan_up(x,t,i,k, t[k]);
+        double right;
+        scan_up(x,t,k+1,j, right);
         #pragma omp taskwait
-        return t[k] + right;
+        sum = t[k] + right;
     }
 }
 
 void scan_down(double v, 
-        vector<double> x, 
-        vector<double> t, 
-        vector<double>& y, 
+        double* x, 
+        double* t, 
+        double* y, 
         int i, int j) {
     if (i == j)
         y[i] = v + x[i];
@@ -114,9 +114,9 @@ void scan_down(double v,
 double add(double x, double y) { return x + y; }
 
 template <typename T>
-void printvec(vector<T> x) {
+void printvec(T* x, int n) {
     cout << "[ ";
-    for (int i = 0; i < x.size(); i++) {
+    for (int i = 0; i < n; i++) {
         cout << x[i] << " ";
     }
     cout << " ]" << endl;
