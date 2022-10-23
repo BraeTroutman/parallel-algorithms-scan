@@ -18,6 +18,8 @@ int main(int argc, char* argv[]) {
     vector<double> scanned3 = scan3(vec);
     vector<double> scanned1 = scan1(vec);
 
+    assert(scanned3==scanned1);
+
     printvec(vec);
     printvec(scanned3);
 }
