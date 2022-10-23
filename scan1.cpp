@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <omp.h>
+#include <cstdlib>
 
 using namespace std;
 
