@@ -8,7 +8,13 @@ using namespace std;
 vector<double> scan3(vector<double>);
 vector<double> scan1(vector<double>);
 double scan_up(vector<double>, vector<double>&, int, int);
-void scan_down(double, vector<double>, vector<double>, vector<double>&, int, int);
+void scan_down(
+        double, 
+        vector<double>, 
+        vector<double>, 
+        vector<double>&, 
+        int, 
+        int);
 double add(double, double);
 
 template <typename T>
@@ -89,7 +95,11 @@ double scan_up(vector<double> x, vector<double>& t, int i, int j) {
     }
 }
 
-void scan_down(double v, vector<double> x, vector<double> t, vector<double>& y, int i, int j) {
+void scan_down(double v, 
+        vector<double> x, 
+        vector<double> t, 
+        vector<double>& y, 
+        int i, int j) {
     if (i == j)
         y[i] = v + x[i];
     else {
