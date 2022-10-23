@@ -6,30 +6,32 @@
 
 using namespace std;
 
-double* scan3(double*, int);
+double* scan3(double*, int, int);
 double* scan1(double*, int);
-void scan_up(double*, double*, int, int, double& sum);
+void scan_up(double*, double*, int, int, double& sum, int);
 void scan_down(
         double, 
         double*, 
         double*, 
         double*, 
         int, 
-        int);
+        int, 
+		int);
 double add(double, double);
 
 template <typename T>
 void printvec(T*, int);
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        cout << "Usage: scan seed length n_threads" << endl;
+    if (argc != 5) {
+        cout << "Usage: scan seed length n_threads bc" << endl;
         return -1;
     } 
 
     srand(atoi(argv[1])); 
     int length = atoi(argv[2]);
     int n_threads = atoi(argv[3]);
+	int bc = atoi(argv[4]);
     omp_set_num_threads(n_threads); 
     
     double* vec = new double[length];
@@ -37,7 +39,7 @@ int main(int argc, char* argv[]) {
         vec[i] = rand() % length;
     
     double start = omp_get_wtime();
-    double* scanned3 = scan3(vec, length);
+    double* scanned3 = scan3(vec, length, bc);
     double pscan_time = omp_get_wtime() - start;
     
     start = omp_get_wtime();
@@ -52,7 +54,7 @@ int main(int argc, char* argv[]) {
     cout << "SCAN:   " << scan_time << endl;
 }
 
-double* scan3(double* x, int n) {
+double* scan3(double* x, int n, int bc) {
     double* y = new double[n];
     double* t = new double[n];
 
@@ -63,8 +65,8 @@ double* scan3(double* x, int n) {
         #pragma omp parallel
         #pragma omp single
         {
-            scan_up(x, t, 1, n, sum);
-            scan_down(x[0], x, t, y, 1, n);
+            scan_up(x, t, 1, n, sum, bc);
+            scan_down(x[0], x, t, y, 1, n, bc);
         }
     }
     return y;
@@ -82,15 +84,15 @@ double* scan1(double* x, int n) {;
     return y;
 }
 
-void scan_up(double* x, double* t, int i, int j, double& sum) {
-    if (i == j)
+void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
+    if ((j-i) <= bc)
         sum = x[i];
     else {
         int k = (i+j)/2;
         #pragma omp task
-        scan_up(x,t,i,k, t[k]);
+        scan_up(x,t,i,k, t[k], bc);
         double right;
-        scan_up(x,t,k+1,j, right);
+        scan_up(x,t,k+1,j, right, bc);
         #pragma omp taskwait
         sum = t[k] + right;
     }
@@ -100,14 +102,16 @@ void scan_down(double v,
         double* x, 
         double* t, 
         double* y, 
-        int i, int j) {
-    if (i == j)
-        y[i] = v + x[i];
+        int i, 
+		int j,
+		int bc) {
+    if ((j - i) <= bc)
+		inclusive_scan(y+i, y+j, y+i, plus<>(), v);
     else {
         int k = (i+j)/2;
         #pragma omp task
-        scan_down(v, x, t, y, i, k);
-        scan_down(v + t[k], x, t, y, k+1, j);
+        scan_down(v, x, t, y, i, k, bc);
+        scan_down(v + t[k], x, t, y, k+1, j, bc);
         #pragma omp taskwait
     }
 }
