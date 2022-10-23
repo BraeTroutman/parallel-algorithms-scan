@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <omp.h>
 
 using namespace std;
 
@@ -14,25 +15,50 @@ template <typename T>
 void printvec(vector<T>);
 
 int main(int argc, char* argv[]) {
-	vector<double> vec = {10, 100, 15, 397, 123, 90};
-    vector<double> scanned3 = scan3(vec);
-    vector<double> scanned1 = scan1(vec);
+    if (argc != 4) {
+        cout << "Usage: scan seed length n_threads" << endl;
+        return -1;
+    } 
 
-    assert(scanned3==scanned1);
+    srand(atoi(argv[1])); 
+    int length = atoi(argv[2]);
+    int n_threads = atoi(argv[3]);
+    omp_set_num_threads(n_threads); 
+
+    vector<double> vec (length, 0);
+    for (int i = 0; i < length; i++) 
+        vec[i] = rand() % length;
+
+    vector<double> scanned3;
+
+    scanned3 = scan3(vec);
+    vector<double> scanned1 = scan1(vec);
 
     printvec(vec);
     printvec(scanned3);
+    printvec(scanned1);
+    assert(scanned3==scanned1);
+
 }
 
 vector<double> scan3(vector<double> x) {
     int len = x.size();
     vector<double> y (len, 0);
     vector<double> t (len, 0);
+
     y[0] = x[0];
 
     if (len > 1) {
-        scan_up(x, t, 1, len);
-        scan_down(x[0], x, t, y, 1, len);
+        #pragma omp parallel
+        {
+            #pragma omp single
+            scan_up(x, t, 1, len);
+
+            #pragma omp barrier
+
+            #pragma omp single
+            scan_down(x[0], x, t, y, 1, len);
+        }
     }
     return y;
 }
@@ -55,8 +81,10 @@ double scan_up(vector<double> x, vector<double>& t, int i, int j) {
         return x[i];
     else {
         int k = (i+j)/2;
+        #pragma omp task
         t[k] = scan_up(x,t,i,k);
         double right = scan_up(x,t,k+1,j);
+        #pragma omp taskwait
         return t[k] + right;
     }
 }
@@ -66,8 +94,10 @@ void scan_down(double v, vector<double> x, vector<double> t, vector<double>& y, 
         y[i] = v + x[i];
     else {
         int k = (i+j)/2;
+        #pragma omp task
         scan_down(v, x, t, y, i, k);
         scan_down(v + t[k], x, t, y, k+1, j);
+        #pragma omp taskwait
     }
 }
 
