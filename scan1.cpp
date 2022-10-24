@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 	cout << n_threads << ','
 		 << length << ','
 		 << pscan_time << ','
-		 << scan_time << ',' << endl;
+		 << scan_time << endl;
 }
 
 double* scan3(double* x, int n) {
