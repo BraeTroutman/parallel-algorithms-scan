@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     start = omp_get_wtime();
     double* scanned1 = scan1(vec, length);
     double scan_time = omp_get_wtime() - start;
-
+		
     for (int i = 0; i < length; i++) {
         assert(scanned3[i] == scanned1[i]);
     }
@@ -67,6 +67,8 @@ double* scan3(double* x, int n, int bc) {
         {
             scan_up(x, t, 1, n, sum, bc);
             scan_down(x[0], x, t, y, 1, n, bc);
+			cout << "y" << endl;
+			printvec(y,n);
         }
     }
     return y;
@@ -85,7 +87,7 @@ double* scan1(double* x, int n) {;
 }
 
 void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
-    if ((j-i) <= bc)
+    if (i == j)
         sum = x[i];
     else {
         int k = (i+j)/2;
@@ -105,9 +107,11 @@ void scan_down(double v,
         int i, 
 		int j,
 		int bc) {
-    if ((j - i) <= bc)
-		inclusive_scan(y+i, y+j, y+i, plus<>(), v);
-    else {
+	if (i == j) {
+		y[i] = v + x[i];
+	} else if ((j - i) <= bc) {
+		inclusive_scan(x+i, x+j+1, y+i, plus<>(), v);
+	} else {
         int k = (i+j)/2;
         #pragma omp task
         scan_down(v, x, t, y, i, k, bc);
@@ -124,6 +128,6 @@ void printvec(T* x, int n) {
     for (int i = 0; i < n; i++) {
         cout << x[i] << " ";
     }
-    cout << " ]" << endl;
+    cout << "]" << endl;
 }
 
