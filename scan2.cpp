@@ -65,8 +65,6 @@ double* scan3(double* x, int n, int bc) {
         {
             scan_up(x, t, 1, n, sum, bc);
             scan_down(x[0], x, t, y, 1, n, bc);
-			cout << "y" << endl;
-			printvec(y,n);
         }
     }
     return y;
