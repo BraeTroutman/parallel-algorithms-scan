@@ -86,7 +86,7 @@ double* scan1(double* x, int n) {;
 
 void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
     if (i == j)
-        sum = x[i];
+        sum = accumulate(x+i, x+j+1, 0);
     else {
         int k = (i+j)/2;
         #pragma omp task
