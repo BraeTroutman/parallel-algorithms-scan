@@ -15,7 +15,6 @@ void scan_down(
         double*, 
         int, 
         int);
-double add(double, double);
 
 template <typename T>
 void printvec(T*, int);
@@ -110,8 +109,6 @@ void scan_down(double v,
         #pragma omp taskwait
     }
 }
-
-double add(double x, double y) { return x + y; }
 
 template <typename T>
 void printvec(T* x, int n) {
