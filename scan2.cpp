@@ -17,7 +17,6 @@ void scan_down(
         int, 
         int, 
 		int);
-
 template <typename T>
 void printvec(T*, int);
 
