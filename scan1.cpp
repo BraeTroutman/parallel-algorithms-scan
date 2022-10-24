@@ -46,8 +46,10 @@ int main(int argc, char* argv[]) {
         assert(scanned3[i] == scanned1[i]);
     }
     
-    cout << "PSCAN3: " << pscan_time << endl;
-    cout << "SCAN:   " << scan_time << endl;
+	cout << n_threads << ','
+		 << length << ','
+		 << pscan_time << ','
+		 << scan_time << ',' << endl;
 }
 
 double* scan3(double* x, int n) {
