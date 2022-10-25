@@ -40,16 +40,17 @@ int main(int argc, char* argv[]) {
     double* scanned3 = scan3(vec, length, bc);
     double pscan_time = omp_get_wtime() - start;
     
-    start = omp_get_wtime();
     double* scanned1 = scan1(vec, length);
-    double scan_time = omp_get_wtime() - start;
 		
     for (int i = 0; i < length; i++) {
         assert(scanned3[i] == scanned1[i]);
     }
+
+	cout << n_threads << ','
+		 << length << ','
+		 << bc << ','
+		 << pscan_time << endl;
     
-    cout << "PSCAN3: " << pscan_time << endl;
-    cout << "SCAN:   " << scan_time << endl;
 }
 
 double* scan3(double* x, int n, int bc) {
