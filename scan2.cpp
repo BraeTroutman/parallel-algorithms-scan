@@ -35,11 +35,13 @@ int main(int argc, char* argv[]) {
     double* vec = new double[length];
     for (int i = 0; i < length; i++) 
         vec[i] = rand() % 100;
-    
+
+	// run my implementation of scan on the array
     double start = omp_get_wtime();
     double* scanned3 = scan3(vec, length, bc);
     double pscan_time = omp_get_wtime() - start;
-    
+   
+	// run naive sequential and STL sequential
     double* scanned1 = scan1(vec, length);
 	double* incscanned = new double[length];
 	start = omp_get_wtime();
@@ -49,7 +51,8 @@ int main(int argc, char* argv[]) {
 	//printvec(vec, length);
 	//printvec(scanned3, length);
 	//printvec(scanned1, length);
-	
+
+	// print array anytime that the two implementations don't match
     for (int i = 0; i < length; i++) {
         if (scanned3[i] != scanned1[i]) {
 			cout << "Mismatched Results at index: " << i << endl;
@@ -61,6 +64,7 @@ int main(int argc, char* argv[]) {
 		}
     }
 
+	// output data in csv format
 	cout << n_threads << ','
 		 << length << ','
 		 << bc << ','
@@ -98,6 +102,10 @@ double* scan1(double* x, int n) {;
     return y;
 }
 
+// same as scan_up in sequential recursive code, but sum is modified
+// as a passed-by-reference variable rather than as a return value
+// from the function. Also performs an accumulate of the current level
+// of the recursion tree when we reach our base case
 void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
 	if (i == j) {
 		sum = x[i];
@@ -114,6 +122,10 @@ void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
     }
 }
 
+// same as scan_down in sequential recursive implementation but modify y 
+// in-place and considers the base case. When our subarray is less than or
+// equal to the base case size, we perform a sequential scan on the entire
+// subarray calculate y at those indices
 void scan_down(double v, 
         double* x, 
         double* t, 
