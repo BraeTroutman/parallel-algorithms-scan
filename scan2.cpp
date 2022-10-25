@@ -34,14 +34,18 @@ int main(int argc, char* argv[]) {
     
     double* vec = new double[length];
     for (int i = 0; i < length; i++) 
-        vec[i] = rand() % length;
+        vec[i] = rand() % 100;
     
     double start = omp_get_wtime();
     double* scanned3 = scan3(vec, length, bc);
     double pscan_time = omp_get_wtime() - start;
     
     double* scanned1 = scan1(vec, length);
-	
+	double* incscanned = new double[length];
+	start = omp_get_wtime();
+	inclusive_scan(vec, vec+length, incscanned);
+	double scan_time = omp_get_wtime() - start;
+
 	//printvec(vec, length);
 	//printvec(scanned3, length);
 	//printvec(scanned1, length);
@@ -58,8 +62,8 @@ int main(int argc, char* argv[]) {
 	cout << n_threads << ','
 		 << length << ','
 		 << bc << ','
-		 << pscan_time << endl;
-    
+		 << pscan_time << ','
+	     << scan_time << endl;
 }
 
 double* scan3(double* x, int n, int bc) {
@@ -93,9 +97,11 @@ double* scan1(double* x, int n) {;
 }
 
 void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
-    if ((j-i) <= bc )
+	if (i == j) {
+		sum = x[i];
+	} else if ((j-i) <= bc ) {
         sum = accumulate(x+i, x+j+1, 0);
-    else {
+	} else {
         int k = (i+j)/2;
         #pragma omp task
         scan_up(x,t,i,k, t[k], bc);
