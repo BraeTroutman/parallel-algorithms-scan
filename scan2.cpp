@@ -77,8 +77,13 @@ double* scan3(double* x, int n, int bc) {
     double* t = new double[n];
 
     y[0] = x[0];
+   	
+	if (bc >= n) {
+		inclusive_scan(x, x+n, y);
+		return y;
+	}
 
-    double sum;
+	double sum;
     if (n > 1) {
         #pragma omp parallel
         #pragma omp single
