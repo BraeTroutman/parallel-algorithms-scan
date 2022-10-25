@@ -38,10 +38,7 @@ int main(int argc, char* argv[]) {
     double* scanned3 = scan3(vec, length);
     double pscan_time = omp_get_wtime() - start;
    	
-	omp_set_num_threads(1); 
-    start = omp_get_wtime();
-	double* scanned3 = scan3(vec, length);
-    double scan_time = omp_get_wtime() - start;
+	double* scanned3 = scan1(vec, length);
 
     double* scanned1 = scan1(vec, length);
     for (int i = 0; i < length; i++) {
@@ -50,8 +47,7 @@ int main(int argc, char* argv[]) {
     
 	cout << n_threads << ','
 		 << length << ','
-		 << pscan_time << ','
-		 << scan_time << endl;
+		 << pscan_time << endl;
 }
 
 double* scan3(double* x, int n) {
