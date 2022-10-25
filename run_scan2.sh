@@ -1,3 +1,4 @@
+make
 echo "num_threads,length,bc,parallel_scan_time" > data/scan2.csv
 for ((p=1; p<=22; p+=1))
 do
