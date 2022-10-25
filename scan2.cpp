@@ -52,8 +52,10 @@ int main(int argc, char* argv[]) {
 	
     for (int i = 0; i < length; i++) {
         if (scanned3[i] != scanned1[i]) {
-			cout << "INDEX: " << i << endl;
+			cout << "Mismatched Results at index: " << i << endl;
+			cout << "My Scan: from " << i-5 << " to " << i+5 << ": ";
 			printvec(scanned3+i-5, 10);
+			cout << "IncScan: from " << i-5 << " to " << i+5 << ": ";
 			printvec(scanned1+i-5, 10);
 			break;
 		}
