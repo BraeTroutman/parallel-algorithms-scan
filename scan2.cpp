@@ -41,9 +41,18 @@ int main(int argc, char* argv[]) {
     double pscan_time = omp_get_wtime() - start;
     
     double* scanned1 = scan1(vec, length);
-		
+	
+	//printvec(vec, length);
+	//printvec(scanned3, length);
+	//printvec(scanned1, length);
+	
     for (int i = 0; i < length; i++) {
-        assert(scanned3[i] == scanned1[i]);
+        if (scanned3[i] != scanned1[i]) {
+			cout << "INDEX: " << i << endl;
+			printvec(scanned3+i-5, 10);
+			printvec(scanned1+i-5, 10);
+			break;
+		}
     }
 
 	cout << n_threads << ','
@@ -84,7 +93,7 @@ double* scan1(double* x, int n) {;
 }
 
 void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
-    if (i == j)
+    if ((j-i) <= bc )
         sum = accumulate(x+i, x+j+1, 0);
     else {
         int k = (i+j)/2;
