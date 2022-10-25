@@ -78,11 +78,6 @@ double* scan3(double* x, int n, int bc) {
 
     y[0] = x[0];
    	
-	if (bc >= n) {
-		inclusive_scan(x, x+n, y);
-		return y;
-	}
-
 	double sum;
     if (n > 1) {
         #pragma omp parallel
@@ -115,6 +110,8 @@ void scan_up(double* x, double* t, int i, int j, double& sum, int bc) {
 	if (i == j) {
 		sum = x[i];
 	} else if ((j-i) <= bc ) {
+		#pragma omp critical
+		cout << "j-i = " << j << "-" << i << " = " << j-i << endl
         sum = accumulate(x+i, x+j+1, 0);
 	} else {
         int k = (i+j)/2;
